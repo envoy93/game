@@ -2,35 +2,30 @@ function Level1(game) {
     Level.apply(this, [game, 'map', 'tiles']);
 }
 
-//var explosions;
-var enemies = [];
 Level1.prototype.create = function () {
 
-    Level.prototype.create.apply(this, enemies);
+    Level.prototype.create.apply(this);
     this.map.setCollisionBetween(2, 4);
 
     //Level.prototype.createBullets.apply(this);
 
     this.player = new Player(game, this, this.bullets);
-    //Level.prototype.createEnemies.apply(this, [enemies]);
-
     this.player.sprite.bringToTop();
-    //  Allow cursors to scroll around the map
     this.cursors = this.game.input.keyboard.createCursorKeys();
-    this.addScript(100, 100, 10,function(){return true;}, function(){return true;});
+
+    //this.addScript(200, 200, 10,"shooter", this);
+    this.addScript(400, 200, 10,"zombie", "time", 1000,this);
+    this.addScript(200, 200, 10,"zombie", "count", 10,this);
 
 }
 
 Level1.prototype.update = function () {
     this.player.update(this.layer);
     Level.prototype.update.apply(this);
-    //game.physics.arcade.overlap(enemyBullets, sprite, bulletHitPlayer, null, this);
-
-
 }
 
-Level1.prototype.addScript = function (x, y, quantity, isStart, isNextSpawn) {
-    Level.prototype.addScript.apply(this, [x, y, quantity, isStart, isNextSpawn]);
+Level1.prototype.addScript = function (x, y, quantity, type,isScriptStartKey, isStartParam,level) {
+    Level.prototype.addScript.apply(this, [x, y, quantity, type,isScriptStartKey,isStartParam, level]);
 }
 
 Level1.prototype.collisionBulletMapHandler = function (bullet, l) {
@@ -39,11 +34,17 @@ Level1.prototype.collisionBulletMapHandler = function (bullet, l) {
 
 Level1.prototype.render = function () {
     this.player.render();
+    this.game.debug.text("Zombie: " + this.enemiesAlive+" / "+this.enemies.length, 0,30);
 }
 
 Level1.prototype.createEnemy = function (script) {
-    Level.prototype.createEnemy.apply(this, [script]);
+    return Level.prototype.createEnemy.apply(this, [script]);
 }
+
+Level1.prototype.isScriptStart = function (script) {
+    return Level.prototype.isScriptStart.apply(this, [script]);
+}
+
 
 
 

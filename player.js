@@ -1,8 +1,5 @@
 var Player = function (game, level) {
-    this.fireRate = 200;
-    this.nextFire = 0;
     this.health = 100;
-    this.attack = 50;
     this.game = game;
     this.level = level;
     //this.enemies = enemies;
@@ -11,17 +8,18 @@ var Player = function (game, level) {
     this.sprite.body.bounce.setTo(0, 0);
     this.sprite.anchor.setTo(0.5, 0.5);
     this.game.camera.follow(this.sprite);
-
-    this.activeBullets = this.createBulletGroup(30, 'bullet', 50);
-    //this.activeBullets.setAll('health1', 50);
+    this.bullet = new Bullet(50, 200, this.level);    //TODO вынести в setWeapon (со сменой фрейма спрайта, запоминанием старого оружия)
+    //this.bullet.setRangeType("bullet", 30, 700)
+    this.bullet.setMeleeType(this);
 }
 
+
 Player.prototype.update = function (layer) {
+    this.bullet.update();
     this.game.physics.arcade.collide(this.sprite, layer);
     this.sprite.rotation = game.physics.arcade.angleToPointer(this.sprite);
-    this.game.physics.arcade.collide(this.activeBullets, this.level.layer, this.level.collisionBulletMapHandler);
-    this.sprite.body.velocity.set(0);
 
+    this.sprite.body.velocity.set(0);
 
 
     if (this.level.cursors.left.isDown) {
@@ -40,28 +38,21 @@ Player.prototype.update = function (layer) {
         //sprite.animations.stop();
     }
 
-
     if (this.game.input.activePointer.isDown) {
         //  Boom!
-        this.fire();
+        //if (this.bullet.isFire()) this.bullet.fireToPointer(this.sprite.x, this.sprite.y);
+        if (this.bullet.isFire()) {
+            for (i = 0; i < this.level.enemies.length; i++) {
+                if (this.level.enemies[i].alive) {
+                    this.bullet.fireMelee(this.level.enemies[i]);
+                }
+            }
+        }
+
+        //this.fire();
     }
 
 }
-
-Player.prototype.fire = function () {
-
-    if (this.game.time.now > this.nextFire && this.activeBullets.countDead() > 0) {
-        this.nextFire = game.time.now + this.fireRate;
-
-        var bullet = this.activeBullets.getFirstExists(false);
-
-        bullet.reset(this.sprite.x, this.sprite.y, bullet.health);
-
-        bullet.rotation = this.game.physics.arcade.moveToPointer(bullet, 700, this.game.input.activePointer);
-    }
-
-}
-
 
 Player.prototype.damage = function (attack) {
     this.health -= attack;
@@ -80,19 +71,5 @@ Player.prototype.damage = function (attack) {
 }
 
 Player.prototype.render = function () {
-    this.game.debug.text("ololo");
-}
-
-Player.prototype.createBulletGroup = function (quantity, sprite, health){
-    bullets = this.game.add.group();
-    bullets.enableBody = true;
-    bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    bullets.createMultiple(quantity, sprite, 0, false);
-    bullets.setAll('anchor.x', 0.5);
-    bullets.setAll('anchor.y', 0.5);
-    bullets.setAll('outOfBoundsKill', true);
-    bullets.setAll('checkWorldBounds', true);
-    bullets.setAll('health', health);
-    return bullets;
-
+    this.game.debug.text("Health: " + this.health, 0, 20);
 }

@@ -1,26 +1,22 @@
-function Zombie(x, y, index, game, level, numSprite) {
-    Enemy.apply(this, [game, level, x, y, 'zombie', 32, 1000, 10]);
+function Zombie(x, y, index, level, numSprite) {
+    Enemy.apply(this, [level, x, y, 'zombie', 32]);
     this.health = 100;
     this.sprite.frame = numSprite;
     //this.sprite.animations.add('kaboom');
     this.sprite.name = index.toString();
+    this.bullet = new Bullet(10, 300, level);
+    this.bullet.setMeleeType(this);
 }
 
 
 Zombie.prototype.update = function () {
     Enemy.prototype.update.apply(this);
-    this.game.physics.arcade.overlap(this.sprite, this.level.player.activeBullets, this.bulletHitEnemy);
+
 }
 
 Zombie.prototype.bulletHitEnemy = function (zombie, bullet) {
-
-    var destroyed = enemies[zombie.name].damage(bullet.health);
-    bullet.kill();
-    if (destroyed) {
-        zombie.loadTexture('kaboom');
-        zombie.animations.add('kaboom');
-        zombie.animations.play('kaboom', 30, false, true);
-    }
+    this.level.enemies[zombie.name].damage(bullet.health);
+    bullet.kill();                //TODO bullet.hit
 
 }
 
@@ -29,7 +25,10 @@ Zombie.prototype.damage = function (attack) {
 }
 
 Zombie.prototype.fire = function () {
-    return Enemy.prototype.fire.apply(this);
+    if (this.bullet.isFire()) {
+        this.bullet.fireMelee(this.level.player);
+    }
+//return Enemy.prototype.fire.apply(this);
 }
 
 

@@ -1,13 +1,9 @@
-function Enemy(game, level, x, y, sprite, distance, fireRate, attack) {
-    this.fireRate = fireRate;
-    this.nextFire = 0;
-    this.attack = attack;
-    this.game = game;
+function Enemy(level, x, y, sprite, distance) {
     this.level = level;
     this.alive = true;
     this.distance = distance;
-    this.sprite = this.game.add.sprite(x, y, sprite);
-    this.game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
+    this.sprite = this.level.game.add.sprite(x, y, sprite);
+    this.level.game.physics.enable(this.sprite, Phaser.Physics.ARCADE);
     this.sprite.anchor.set(0.5);
     this.sprite.body.bounce.setTo(0, 0);
     this.sprite.body.allowGravity = false;
@@ -19,28 +15,29 @@ Enemy.prototype.damage = function (attack) {
     if (this.health <= 0) {
         this.alive = false;
         this.sprite.immovable = true;
+
+        this.sprite.loadTexture('kaboom');
+        this.sprite.animations.add('kaboom');
+        this.sprite.animations.play('kaboom', 30, false, true);
+
         return true;
     }
     return false;
 }
 
-Enemy.prototype.fire = function () {
-    if (this.game.time.now > this.nextFire) {
-        this.nextFire = game.time.now + this.fireRate;
-        this.level.player.damage(this.attack);
-    }
-}
-
 Enemy.prototype.update = function () {
-    if (this.game.physics.arcade.distanceBetween(this.sprite, this.level.player.sprite) > this.distance) this.sprite.rotation = this.game.physics.arcade.moveToObject(this.sprite, this.level.player.sprite, 50)
-    else  {
+    this.bullet.update();
+    if (this.level.game.physics.arcade.distanceBetween(this.sprite, this.level.player.sprite) > this.distance) this.sprite.rotation = this.level.game.physics.arcade.moveToObject(this.sprite, this.level.player.sprite, 50)
+    else {
         this.sprite.body.velocity.set(0);
-        this.sprite.rotation = this.game.physics.arcade.angleBetween(this.sprite, this.level.player.sprite);
+        this.sprite.rotation = this.level.game.physics.arcade.angleBetween(this.sprite, this.level.player.sprite);
         this.fire();
 
     }
-    this.game.physics.arcade.collide(this.sprite, this.level.layer);
-    this.game.physics.arcade.collide(this.level.player.sprite, this.sprite);
+    this.level.game.physics.arcade.collide(this.sprite, this.level.layer);
+    this.level.game.physics.arcade.collide(this.level.player.sprite, this.sprite);
+    if (!this.level.player.bullet.isMelee) this.level.game.physics.arcade.overlap(this.sprite, this.level.player.bullet.bullets, this.bulletHitEnemy, false, this);
+    if (!this.bullet.isMelee) this.level.game.physics.arcade.overlap(this.level.player.sprite, this.bullet.bullets, this.bulletHitPlayer, false, this);
     //this.sprite.rotation = this.game.physics.arcade.angleBetween(this.sprite, this.level.player);
 
 }
