@@ -118,15 +118,16 @@ Level.prototype.disableBonusPlayer = function (key) {
 }
 
 Level.prototype.create = function () {
+    if (!this.game.device.desktop) {
+        this.game.scale.startFullScreen(false);
+    }
+
     this.map = game.add.tilemap(this.tilemap, 32, 32);
     this.map.addTilesetImage(this.tilesetImage);
     this.layer = this.map.createLayer(0);
     this.layer.resizeWorld();
     this.scripts = [];
     this.controller.create();
-    if (!this.game.device.desktop) {
-        this.game.input.onDown.add(this.gofull, this);
-    }
     // Zombie.prototype = Object.create(Enemy.prototype);
 }
 
@@ -170,10 +171,9 @@ Level.prototype.activateBonus = function (sprite, player) {
     sprite.kill();
 }
 
-Level.prototype.gofull = function () {
-    this.game.scale.startFullScreen(false);
-}
-
 Level.prototype.preload = function () {
+    // fullscreen setup
+    this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
     this.controller.preload();
 }
