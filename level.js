@@ -10,20 +10,11 @@ function Level(game, tilemap, tilesetImage) {
     this.enemiesAlive = 0;
     this.game = game;
     this.enemies = [];
+    this.bonuses = [];
     this.tilemap = tilemap;
     this.tilesetImage = tilesetImage;
 
-}
-
-Level.prototype.createEnemy = function (script) {
-    if (script.key == "zombie") {
-        return new Zombie(script.x, script.y, script.level.enemies.length, this, 0);
-    } else if (script.key == "shooter") {
-        return new Shooter(script.x, script.y, script.level.enemies.length, this, 1);
-    }
-
-    Zombie.prototype = Object.create(Enemy.prototype);
-    return false;
+    this.controller = new VirtualController(this);
 }
 
 Level.prototype.isScriptStart = function (script) {
@@ -32,13 +23,98 @@ Level.prototype.isScriptStart = function (script) {
     } else if (script.isScriptStartKey == "count") {
         return script.level.enemies.length >= script.isStartParam;
     } else if (script.isScriptStartKey == "scriptsComplete") {
-        var b1 = 1;                                                                           //TODO доделать - не учитывать тек скрипт
-        for (i = 0; i < script.level.scripts.length; i++) {
-            b1 = b1 & script.level.scripts.notSpawned;
+        var b1 = true;
+        for (var i = 0; i < script.isStartParam; i++) {
+            b1 = b1 & (script.level.scripts[i].notSpawned <= 0);
         }
-        return (b1 == 1) ? true : false;
+        return b1;
     }
     return false;
+}
+
+
+Level.prototype.createObject = function (script) {
+    if (script.objectKey == "zombie") {
+        return new Zombie(script.x, script.y, script.level.enemies.length, this, 0);
+    } else if (script.objectKey == "shooter") {
+        return new Shooter(script.x, script.y, script.level.enemies.length, this, 1);
+    } else if (script.objectKey == "speed") {
+        var bonus = this.game.add.sprite(100, 100, "bonus", 2);
+        bonus.name = this.bonuses.length.toString();         //TODO     вынести это дерьмище в апи скрипта|уровня(?)
+        bonus.immovable = true;
+        this.game.time.events.add(Phaser.Timer.SECOND * 10, function () {
+            if (this.alive) this.kill();
+        }, bonus);
+        return  bonus;
+    } else if (script.objectKey == "invulnerability") {
+        var bonus = this.game.add.sprite(100, 100, "bonus", 3);
+        bonus.name = this.bonuses.length.toString();
+        bonus.immovable = true;
+        this.game.time.events.add(Phaser.Timer.SECOND * 10, function () {
+            if (this.alive) this.kill();
+        }, bonus);
+        return  bonus;
+    } else if (script.objectKey == "laser") {
+        var bonus = this.game.add.sprite(200, 200, "bonus", 1);
+        bonus.name = this.bonuses.length.toString();
+        bonus.immovable = true;
+        this.game.time.events.add(Phaser.Timer.SECOND * 10, function () {
+            if (this.alive) this.kill();
+        }, bonus);
+        return  bonus;
+    } else if (script.objectKey == "machineGun") {
+        var bonus = this.game.add.sprite(200, 200, "bonus", 0);
+        bonus.name = this.bonuses.length.toString();
+        bonus.immovable = true;
+        this.game.time.events.add(Phaser.Timer.SECOND * 10, function () {
+            if (this.alive) this.kill();
+        }, bonus);
+        return  bonus;
+    }
+
+    Zombie.prototype = Object.create(Enemy.prototype);
+    Shooter.prototype = Object.create(Enemy.prototype);
+    return false;
+}
+
+Level.prototype.setBonusPlayer = function (key, param) {
+    if (key == "speed") {
+        this.player.oldSpeed = this.player.speed;
+        this.player.speed = param;
+    }
+    else if (key == "invulnerability") {
+        this.player.isInvulnerability = true;
+    }
+    else if (key == "machineGun") {
+        this.player.oldBullet = this.player.bullet;
+        this.player.bullet = new Bullet(35, 100, this.player, this);
+        this.player.bullet.setRangeType("bullet", 100, 700, true, 0, 1);
+        this.player.sprite.frame = 2;
+    }
+    else if (key == "laser") {
+        this.player.oldBullet = this.player.bullet;
+        this.player.bullet = new Bullet(15, 700, this.player, this);
+        this.player.bullet.setRangeType("bullet", 15, 700, false, 150, 2);
+        this.player.sprite.frame = 1;
+    }
+}
+
+Level.prototype.disableBonusPlayer = function (key) {
+    if (key == "speed") {
+        this.player.speed = this.player.oldSpeed;
+    }
+    else if (key == "invulnerability") {
+        this.player.isInvulnerability = false;
+    }
+    else if (key == "machineGun") {
+        this.player.bullet.bullets.removeAll(true, true);
+        this.player.bullet = this.player.oldBullet;
+
+    }
+    else if (key == "laser") {
+        this.player.bullet.bullets.removeAll(true, true);
+        this.player.bullet = this.player.oldBullet;
+    }
 }
 
 Level.prototype.create = function () {
@@ -47,17 +123,28 @@ Level.prototype.create = function () {
     this.layer = this.map.createLayer(0);
     this.layer.resizeWorld();
     this.scripts = [];
+    this.controller.create();
+    if (!this.game.device.desktop) {
+        this.game.input.onDown.add(this.gofull, this);
+    }
     // Zombie.prototype = Object.create(Enemy.prototype);
 }
 
-Level.prototype.addScript = function (x, y, quantity, type, isScriptStartKey,isStartParam, level) {
-    var script1 = new Script(x, y, quantity, type,isScriptStartKey,isStartParam, level);
+Level.prototype.addScript = function (x, y, quantity, type, objectKey, isScriptStartKey, isStartParam, bonusParam, level) {
+    var script1 = new Script(x, y, quantity, type, objectKey, isScriptStartKey, isStartParam, bonusParam, level);
     this.scripts.push(script1);
 }
 
 Level.prototype.update = function () {
+    for (var i = 0; i < this.bonuses.length; i++) {
+        if (this.bonuses[i].sprite.alive) {
+            //this.game.physics.arcade.overlap(this.bonuses[i].sprite, this.player.sprite, this.activateBonus, false, this);
+            if (this.bonuses[i].sprite.overlap(this.player.sprite)) this.activateBonus(this.bonuses[i].sprite, this.player.sprite);
+        }
+    }
+
     for (var i = 0; i < this.scripts.length; i++) {
-        if (this.scripts[i].notSpawned > 0)  if (this.scripts[i].isStart(this)) this.scripts[i].createEnemy();
+        if (this.scripts[i].notSpawned > 0)  if (this.scripts[i].isStart(this)) this.scripts[i].createObject();
     }
 
     this.enemiesAlive = 0;
@@ -73,4 +160,20 @@ Level.prototype.update = function () {
             this.enemies[i].update();
         }
     }
+
+
+}
+
+Level.prototype.activateBonus = function (sprite, player) {
+    this.setBonusPlayer(this.bonuses[sprite.name].script.objectKey, this.bonuses[sprite.name].script.bonusParam);
+    this.game.time.events.add(Phaser.Timer.SECOND * 5, this.bonuses[sprite.name].script.disableBonus, this.bonuses[sprite.name].script);
+    sprite.kill();
+}
+
+Level.prototype.gofull = function () {
+    this.game.scale.startFullScreen(false);
+}
+
+Level.prototype.preload = function () {
+    this.controller.preload();
 }

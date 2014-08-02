@@ -4,8 +4,8 @@ function Zombie(x, y, index, level, numSprite) {
     this.sprite.frame = numSprite;
     //this.sprite.animations.add('kaboom');
     this.sprite.name = index.toString();
-    this.bullet = new Bullet(10, 300, level);
-    this.bullet.setMeleeType(this);
+    this.bullet = new Bullet(10, 300, this, level);
+    this.bullet.setMeleeType();
 }
 
 
@@ -14,10 +14,12 @@ Zombie.prototype.update = function () {
 
 }
 
-Zombie.prototype.bulletHitEnemy = function (zombie, bullet) {
-    this.level.enemies[zombie.name].damage(bullet.health);
-    bullet.kill();                //TODO bullet.hit
+Zombie.prototype.bulletHitPlayer = function (player, bullet) {
+    Enemy.prototype.bulletHitPlayer.apply(this, [player, bullet]);
+}
 
+Zombie.prototype.bulletHitEnemy = function (enemy, bullet) {
+    Enemy.prototype.bulletHitEnemy.apply(this, [enemy, bullet]);
 }
 
 Zombie.prototype.damage = function (attack) {

@@ -1,9 +1,10 @@
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create, update: update, render: render });
+var game = new Phaser.Game(1280, 720, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create, update: update, render: render });
 var level1;
 function preload() {
     new Preloader();
     level1 = new Level1(game);
     Level1.prototype = Object.create(Level.prototype);
+    level1.preload();
 }
 
 function create() {

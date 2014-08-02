@@ -1,18 +1,23 @@
-function Bullet(attack, fireRate, level) {
+function Bullet(attack, fireRate, hero, level) {
     //TODO количество патронов
 
     this.attack = attack;
     this.fireRate = fireRate;
     this.level = level;
     this.nextFire = 0;
-    this.isSetType = false;
+    this.hero = hero;
+    this.isInfinite = true;
 }
 
-Bullet.prototype.setRangeType = function (sprite, quantity, speed) {
+/*function setInfinite(isTime, param){
+
+} */
+
+Bullet.prototype.setRangeType = function (sprite, quantity, speed, isKillBullet, range, spriteFrame) {
     var bullets = this.level.game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    bullets.createMultiple(quantity, sprite, 0, false);
+    bullets.createMultiple(quantity, sprite, spriteFrame, false);
     bullets.setAll('anchor.x', 0.5);
     bullets.setAll('anchor.y', 0.5);
     bullets.setAll('outOfBoundsKill', true);
@@ -22,15 +27,14 @@ Bullet.prototype.setRangeType = function (sprite, quantity, speed) {
     this.bullets = bullets;
     this.speed = speed;
     this.isMelee = false;
-    this.isSetType = true;
+    this.range = range;
+    this.isKillBullet = isKillBullet;
 }
 
-Bullet.prototype.setMeleeType = function (hero) {
+Bullet.prototype.setMeleeType = function () {
     this.hitSprite = this.level.game.add.sprite(0, 0, 'melee32x32', 0);
     this.hitSprite.anchor.setTo(.0, 0.5);
-    this.hero = hero;
     this.isMelee = true;
-    this.isSetType = true;
 }
 
 
@@ -46,21 +50,20 @@ Bullet.prototype.fireMelee = function (target) {
     }
 }
 
-Bullet.prototype.fireToPointer = function (x, y) {
-    var bullet = this.fire(x, y);
-    // this.level.game.time.events.add(Phaser.Timer.SECOND * 1, this.stopFire, this);
 
-    bullet.rotation = this.level.game.physics.arcade.moveToPointer(bullet, this.speed, this.level.game.input.activePointer);
+/*Bullet.prototype.fireToObject = function (x, y) {   //TODO доделать
+ var bullet = this.fire(x, y);
+ bullet.rotation = this.level.game.physics.arcade.moveToObject(bullet, this.speed, this.game.input.activePointer);
+ } */
+
+Bullet.prototype.fireToPointer = function (x, y) {   //TODO доделать
+    var bullet = this.fire(x, y);
+    bullet.rotation = this.level.game.physics.arcade.moveToPointer(bullet, this.speed);
 }
 
-Bullet.prototype.fireToObject = function (x, y) {   //TODO доделать
+Bullet.prototype.fireToXY = function (x, y, toX, toY) {
     var bullet = this.fire(x, y);
-    bullet.rotation = this.level.game.physics.arcade.moveToPointer(bullet, this.speed, this.game.input.activePointer);
-}
-
-Bullet.prototype.fireToXY = function (x, y, toX, toY) {   //TODO доделать
-    var bullet = this.fire(x, y);
-    bullet.rotation = this.level.game.physics.arcade.moveToXY(bullet, toX, toY, this.speed);//this.level.game.physics.arcade.moveToPointer(bullet, this.speed, this.game.input.activePointer);
+    bullet.rotation = this.level.game.physics.arcade.moveToXY(bullet, toX, toY, this.speed);
 }
 
 
@@ -76,8 +79,19 @@ Bullet.prototype.update = function () {
         this.hitSprite.x = this.hero.sprite.x;
         this.hitSprite.y = this.hero.sprite.y;
         this.hitSprite.rotation = this.hero.sprite.rotation;
+    } else {
+        if (this.range != 0) {
+            for (var i = 0; i < this.bullets.length; i++)
+                if (this.bullets.getAt(i).alive)
+                    if (this.level.game.physics.arcade.distanceBetween(this.bullets.getAt(i), this.hero.sprite) > this.range)
+                        this.bullets.getAt(i).kill();
+        }
     }
 
     this.level.game.physics.arcade.collide(this.bullets, this.level.layer, this.level.collisionBulletMapHandler);
 
+}
+
+Bullet.prototype.afterHitRange = function (sprite, bullet) {
+    if (bullet.isKillBullet) sprite.kill();
 }

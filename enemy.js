@@ -42,4 +42,14 @@ Enemy.prototype.update = function () {
 
 }
 
+Enemy.prototype.bulletHitEnemy = function (zombie, bullet) {
+    this.level.enemies[zombie.name].damage(this.level.player.bullet.attack);
+    this.bullet.afterHitRange(bullet, this.level.player.bullet);
+
+}
+
+Enemy.prototype.bulletHitPlayer = function (player, bullet) {
+    this.level.player.damage(this.bullet.attack);
+    this.bullet.afterHitRange(bullet, this.bullet);
+}
 

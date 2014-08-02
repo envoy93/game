@@ -4,24 +4,20 @@ function Shooter(x, y, index, level, numSprite) {
     this.sprite.frame = numSprite;
     //this.sprite.animations.add('kaboom');
     this.sprite.name = index.toString();
-    //this.bullet = new Bullet("bullet", 30 , false, 30,300, 700, this.level);
-    this.bullet = new Bullet(5, 1000, level);
-    this.bullet.setRangeType("bullet", 15, 400);
+    this.bullet = new Bullet(5, 1000, this, level);
+    this.bullet.setRangeType("bullet", 15, 400, true, 0, 0);
 }
-
 
 Shooter.prototype.update = function () {
     Enemy.prototype.update.apply(this);
 }
 
 Shooter.prototype.bulletHitPlayer = function (player, bullet) {
-    this.level.player.damage(bullet.health);
-    bullet.kill();
+    Enemy.prototype.bulletHitPlayer.apply(this, [player, bullet]);
 }
 
 Shooter.prototype.bulletHitEnemy = function (enemy, bullet) {
-    this.level.enemies[enemy.name].damage(bullet.health);
-    bullet.kill();                //TODO вынести в bullet.hit, например для лазера
+    Enemy.prototype.bulletHitEnemy.apply(this, [enemy, bullet]);
 }
 
 Shooter.prototype.damage = function (attack) {
