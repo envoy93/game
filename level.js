@@ -15,6 +15,7 @@ function Level(game, tilemap, tilesetImage) {
     this.tilesetImage = tilesetImage;
 
     this.controller = new VirtualController(this);
+    this.ui = new UI(this);
 }
 
 Level.prototype.isScriptStart = function (script) {
@@ -79,23 +80,30 @@ Level.prototype.createObject = function (script) {
 
 Level.prototype.setBonusPlayer = function (key, param) {
     if (key == "speed") {
+        this.ui.addInstruction(this.player.sprite.x, this.player.sprite.y, "Скорость", 3 * Phaser.Timer.SECOND);
         this.player.oldSpeed = this.player.speed;
         this.player.speed = param;
     }
     else if (key == "invulnerability") {
+        this.ui.addInstruction(this.player.sprite.x, this.player.sprite.y, "Неуязвимость", 3 * Phaser.Timer.SECOND);
         this.player.isInvulnerability = true;
     }
     else if (key == "machineGun") {
-        this.player.oldBullet = this.player.bullet;
+        this.ui.addInstruction(this.player.sprite.x, this.player.sprite.y, "Пулемет", 3 * Phaser.Timer.SECOND);
+
+        if (!this.player.oldBullet) this.player.oldBullet = this.player.bullet;
         this.player.bullet = new Bullet(35, 100, this.player, this);
-        this.player.bullet.setRangeType("bullet", 100, 700, true, 0, 1);
+        this.player.bullet.setRangeType("bullet", 100, 700, true, 0, 1, -1);
         this.player.sprite.frame = 2;
+        this.ui.updateWeaponInfo(1,100,'/'+100)
     }
     else if (key == "laser") {
-        this.player.oldBullet = this.player.bullet;
+        this.ui.addInstruction(this.player.sprite.x, this.player.sprite.y, "Лазер", 3 * Phaser.Timer.SECOND);
+        if (!this.player.oldBullet) this.player.oldBullet = this.player.bullet;
         this.player.bullet = new Bullet(15, 700, this.player, this);
-        this.player.bullet.setRangeType("bullet", 15, 700, false, 150, 2);
+        this.player.bullet.setRangeType("bullet", 15, 700, false, 150, 2, 3);
         this.player.sprite.frame = 1;
+        this.ui.updateWeaponInfo(2,3,'/'+3)
     }
 }
 
@@ -107,27 +115,28 @@ Level.prototype.disableBonusPlayer = function (key) {
         this.player.isInvulnerability = false;
     }
     else if (key == "machineGun") {
+        if (!this.player.oldBullet) return;
         this.player.bullet.bullets.removeAll(true, true);
         this.player.bullet = this.player.oldBullet;
+        this.player.oldBullet = false;
 
     }
     else if (key == "laser") {
+        if (!this.player.oldBullet) return;
         this.player.bullet.bullets.removeAll(true, true);
         this.player.bullet = this.player.oldBullet;
+        this.player.oldBullet = false;
     }
 }
 
 Level.prototype.create = function () {
-    if (!this.game.device.desktop) {
-        this.game.scale.startFullScreen(false);
-    }
-
     this.map = game.add.tilemap(this.tilemap, 32, 32);
     this.map.addTilesetImage(this.tilesetImage);
     this.layer = this.map.createLayer(0);
     this.layer.resizeWorld();
     this.scripts = [];
     this.controller.create();
+    this.ui.create();
     // Zombie.prototype = Object.create(Enemy.prototype);
 }
 
@@ -162,12 +171,12 @@ Level.prototype.update = function () {
         }
     }
 
-
+    this.ui.update();
 }
 
 Level.prototype.activateBonus = function (sprite, player) {
     this.setBonusPlayer(this.bonuses[sprite.name].script.objectKey, this.bonuses[sprite.name].script.bonusParam);
-    this.game.time.events.add(Phaser.Timer.SECOND * 5, this.bonuses[sprite.name].script.disableBonus, this.bonuses[sprite.name].script);
+    this.game.time.events.add(Phaser.Timer.SECOND * 50, this.bonuses[sprite.name].script.disableBonus, this.bonuses[sprite.name].script);
     sprite.kill();
 }
 
@@ -176,4 +185,5 @@ Level.prototype.preload = function () {
     this.game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     this.game.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
     this.controller.preload();
+    this.ui.preload();
 }

@@ -19,14 +19,18 @@ Level1.prototype.create = function () {
     this.player = new Player(game, this, this.bullets);
     this.player.sprite.bringToTop();
     this.cursors = this.game.input.keyboard.createCursorKeys();
-
+    this.ui.updateLives();
     //this.addScript(200, 200, 10,"shooter", this);
     this.addScript(400, 200, 10, "enemy", "zombie", "time", 1000, false, this);
-   // this.addScript(400, 200, 1, "bonus", "speed", "time", 1000, 300, this);
+    // this.addScript(400, 200, 1, "bonus", "speed", "time", 1000, 300, this);
     this.addScript(200, 200, 1, "bonus", "laser", "time", 200, 300, this);
-   // this.addScript(200, 200, 1, "bonus", "invulnerability", "time", 200, 0, this);
+    // this.addScript(200, 200, 1, "bonus", "invulnerability", "time", 200, 0, this);
     //this.addScript(400, 200, 1, "bonus", "machineGun", "time", 200, 300, this);
     //this.addScript(200, 200, 10,"zombie", "scriptsComplete", this.scripts.length,this);
+    if (!this.game.device.desktop) {
+        this.game.input.onDown.add(this.gofull, this);
+    }
+
 
 }
 
@@ -70,6 +74,18 @@ Level1.prototype.activateBonus = function (sprite, player) {
 
 Level1.prototype.preload = function () {
     Level.prototype.preload.apply(this);
+}
+
+Level1.prototype.gofull = function () {
+    this.game.scale.startFullScreen(false);
+}
+
+Level1.prototype.setupText = function () {
+    Level.prototype.setupText.apply(this);
+}
+
+Level1.prototype.addToScore = function (score) {
+    Level.prototype.addToScore.apply(this, [score]);
 }
 
 

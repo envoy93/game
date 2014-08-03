@@ -11,7 +11,7 @@ var Player = function (game, level) {
     this.game.camera.follow(this.sprite);
     //this.bullet = new Bullet(50, 200, this, this.level);    //TODO вынести в setWeapon (со сменой фрейма спрайта, запоминанием старого оружия)
     this.bullet = new Bullet(50, 200, this, this.level);    //TODO вынести в setWeapon (со сменой фрейма спрайта, запоминанием старого оружия)
-    this.bullet.setRangeType("bullet", 30, 700, true, 0, 0);
+    this.bullet.setRangeType("bullet", 30, 700, true, 0, 0,-1);
     //this.bullet.setRangeType("bullet", 30, 700, true, 100);
     this.isInvulnerability = false;
     this.oldBullet = false;
@@ -76,7 +76,10 @@ Player.prototype.update = function (layer) {
 Player.prototype.damage = function (attack) {
     if (this.isInvulnerability)  return false;
     this.health -= attack;
+
     if (this.health <= 0) {
+        this.health = 0;
+        this.level.ui.updateLives();
         //this.sprite.kill();
         this.alive = false;
         this.sprite.immovable = true;
@@ -86,6 +89,8 @@ Player.prototype.damage = function (attack) {
         this.sprite.animations.play('kaboom', 30, false, true);
 
         return true;
+    }  else {
+        this.level.ui.updateLives();
     }
     return false;
 }

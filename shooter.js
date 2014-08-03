@@ -5,7 +5,7 @@ function Shooter(x, y, index, level, numSprite) {
     //this.sprite.animations.add('kaboom');
     this.sprite.name = index.toString();
     this.bullet = new Bullet(5, 1000, this, level);
-    this.bullet.setRangeType("bullet", 15, 400, true, 0, 0);
+    this.bullet.setRangeType("bullet", 15, 400, true, 0, 0,-1);
 }
 
 Shooter.prototype.update = function () {

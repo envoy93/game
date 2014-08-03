@@ -11,9 +11,9 @@ function Bullet(attack, fireRate, hero, level) {
 
 /*function setInfinite(isTime, param){
 
-} */
+ } */
 
-Bullet.prototype.setRangeType = function (sprite, quantity, speed, isKillBullet, range, spriteFrame) {
+Bullet.prototype.setRangeType = function (sprite, quantity, speed, isKillBullet, range, spriteFrame, size) {
     var bullets = this.level.game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -29,6 +29,7 @@ Bullet.prototype.setRangeType = function (sprite, quantity, speed, isKillBullet,
     this.isMelee = false;
     this.range = range;
     this.isKillBullet = isKillBullet;
+    this.size = size;
 }
 
 Bullet.prototype.setMeleeType = function () {
@@ -71,6 +72,16 @@ Bullet.prototype.fire = function (x, y) {
     this.nextFire = this.level.game.time.now + this.fireRate;
     var bullet = this.bullets.getFirstExists(false);
     bullet.reset(x, y, bullet.health);
+    if (this.size == 0) {
+        this.level.ui.updateWeaponInfo(0, "", "")
+        this.level.player.bullet.bullets.removeAll(true, true);
+        this.level.player.bullet = this.level.player.oldBullet;
+        this.level.player.oldBullet = false;
+    }
+    if (this.size > 0) {
+        this.size--;
+        this.level.ui.updateWeaponInfo(false, this.size, false)
+    }
     return bullet;
 }
 
