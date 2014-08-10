@@ -12,16 +12,6 @@ function VirtualController(level) {
     this.level = level;
 }
 
-
-VirtualController.prototype.preload = function () {
-    //gamepad buttons
-    this.level.game.load.spritesheet('buttondiagonal', 'assets/buttons/buttons-big/button-diagonal.png',64,64);
-    this.level.game.load.spritesheet('buttonmove', 'assets/buttons/buttons-big/buttons-move.png',64,64);
-    this.level.game.load.spritesheet('buttonshoot', 'assets/buttons/buttons-big/buttons-shoot.png',64,64);
-    //this.level.game.load.spritesheet('buttonfire', 'assets/buttons/buttons-big/button-round-a.png',96,96);
-    //this.level.game.load.spritesheet('buttonjump', 'assets/buttons/buttons-big/button-round-b.png',96,96);
-}
-
 VirtualController.prototype.create = function () {
     var buttontop = this.level.game.add.button(128, this.level.game.camera.height - 170, 'buttonmove', null, this, 0, 1, 0, 1);
     buttontop.anchor.set(0.5,0.5);
@@ -41,7 +31,8 @@ VirtualController.prototype.create = function () {
     },this);
 
 
-    var buttontopright = this.level.game.add.button(160, 248, 'buttondiagonal', null, this, 3, 1, 3, 1);
+    var buttontopright = this.level.game.add.button(160, this.level.game.camera.height - 170, 'buttondiagonal', null, this, 3, 1, 3, 1);
+    buttontopright.anchor.set(0,0.5);
     buttontopright.fixedToCamera = true;
     buttontopright.events.onInputOver.add(function () {
         this.right = true;
@@ -60,7 +51,8 @@ VirtualController.prototype.create = function () {
         this.up = false;
     },this);
 
-    var buttontopleft = this.level.game.add.button(32, 248, 'buttondiagonal', null, this, 2, 0, 2, 0);
+    var buttontopleft = this.level.game.add.button(32, this.level.game.camera.height - 170, 'buttondiagonal', null, this, 2, 0, 2, 0);
+    buttontopleft.anchor.set(0,0.5);
     buttontopleft.fixedToCamera = true;
     buttontopleft.events.onInputOver.add(function () {
         this.left = true;
@@ -96,7 +88,8 @@ VirtualController.prototype.create = function () {
         this.left = false;
     },this);
 
-    var buttonbottomleft = this.level.game.add.button(32, 376, 'buttondiagonal', null, this, 6, 4, 6, 4);
+    var buttonbottomleft = this.level.game.add.button(32, this.level.game.camera.height - 42, 'buttondiagonal', null, this, 6, 4, 6, 4);
+    buttonbottomleft.anchor.set(0,0.5);
     buttonbottomleft.fixedToCamera = true;
     buttonbottomleft.events.onInputOver.add(function () {
         this.left = true;
@@ -131,7 +124,8 @@ VirtualController.prototype.create = function () {
         this.right = false;
     },this);
 
-    var buttonbottomright = this.level.game.add.button(160, 376, 'buttondiagonal', null, this, 7, 5, 7, 5);
+    var buttonbottomright = this.level.game.add.button(160, this.level.game.camera.height - 42, 'buttondiagonal', null, this, 7, 5, 7, 5);
+    buttonbottomright.anchor.set(0,0.5);
     buttonbottomright.fixedToCamera = true;
     buttonbottomright.events.onInputOver.add(function () {
         this.right = true;

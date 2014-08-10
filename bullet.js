@@ -72,16 +72,17 @@ Bullet.prototype.fire = function (x, y) {
     this.nextFire = this.level.game.time.now + this.fireRate;
     var bullet = this.bullets.getFirstExists(false);
     bullet.reset(x, y, bullet.health);
+    if (this.size > 0) {
+        this.size--;
+        this.level.ui.updateWeaponInfo(-1, this.size, false)
+    }
     if (this.size == 0) {
-        this.level.ui.updateWeaponInfo(0, "", "")
+        this.level.ui.updateWeaponInfo(0, " ", " ")
         this.level.player.bullet.bullets.removeAll(true, true);
         this.level.player.bullet = this.level.player.oldBullet;
         this.level.player.oldBullet = false;
     }
-    if (this.size > 0) {
-        this.size--;
-        this.level.ui.updateWeaponInfo(false, this.size, false)
-    }
+
     return bullet;
 }
 

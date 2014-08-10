@@ -28,15 +28,21 @@ Player.prototype.update = function (layer) {
 
 
     if (this.level.cursors.left.isDown || this.level.controller.left) {
+        this.sprite.angle = 180;
         this.sprite.body.velocity.x = -this.speed;
-    }
-    if (this.level.cursors.right.isDown || this.level.controller.right) {
+    } else if (this.level.cursors.right.isDown || this.level.controller.right) {
+        this.sprite.angle = 0;
         this.sprite.body.velocity.x = this.speed;
     }
     if (this.level.cursors.up.isDown || this.level.controller.up) {
+        this.sprite.angle = -90;
+        if (this.level.cursors.left.isDown || this.level.controller.left) this.sprite.angle = -135
+        else if (this.level.cursors.right.isDown || this.level.controller.right)  this.sprite.angle = -45
         this.sprite.body.velocity.y = -this.speed;
-    }
-    if (this.level.cursors.down.isDown || this.level.controller.down) {
+    } else if (this.level.cursors.down.isDown || this.level.controller.down) {
+        this.sprite.angle = 90;
+        if (this.level.cursors.left.isDown || this.level.controller.left) this.sprite.angle = 135
+        else if (this.level.cursors.right.isDown || this.level.controller.right)  this.sprite.angle = 45
         this.sprite.body.velocity.y = this.speed;
     }
     //else {
@@ -96,5 +102,5 @@ Player.prototype.damage = function (attack) {
 }
 
 Player.prototype.render = function () {
-    this.game.debug.text("Health: " + this.health, 0, 20);
+    //this.game.debug.text("Health: " + this.health, 0, 20);
 }

@@ -44,7 +44,7 @@ Enemy.prototype.update = function () {
 
 Enemy.prototype.bulletHitEnemy = function (zombie, bullet) {
     var destroyed = this.level.enemies[zombie.name].damage(this.level.player.bullet.attack);
-    if (destroyed)  this.level.ui.addToScore(5);
+    if (destroyed)  this.level.addToScore(5);
     this.bullet.afterHitRange(bullet, this.level.player.bullet);
 
 }
